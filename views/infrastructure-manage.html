@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {{template "base/head.html" .}}
+  <meta charset="UTF-8">
+  <title>VLU Infrastructure Management System</title>
+  <script type="text/javascript">
+    // window.data = JSON.parse("{{.data}}")
+    window.symbol = "{{.symbol}}"
+    window.theme = "{{.theme}}"
+    window.series = "{{.series}}"
+    window.limit = "{{.limit}}"
+    window.chart = "{{.chart}}"
+  </script>
+<link href="/static/js/webpack/dist/infrastructure-manage.cbcfc15bc2f13f325f3e.css" rel="stylesheet"></head>
+<body style="height: 100vh">
+<div id="root" style="height: 100%"></div>
+<script defer src="/static/js/webpack/dist/infrastructure-manage.bundle.cbcfc15bc2f13f325f3e.js"></script></body>
+</html>

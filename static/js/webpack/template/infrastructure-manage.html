@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {{template "base/head.html" .}}
+  <meta charset="UTF-8">
+  <title>VLU Infrastructure Management System</title>
+  <script type="text/javascript">
+    // window.data = JSON.parse("{{.data}}")
+    window.symbol = "{{.symbol}}"
+    window.theme = "{{.theme}}"
+    window.series = "{{.series}}"
+    window.limit = "{{.limit}}"
+    window.chart = "{{.chart}}"
+  </script>
+</head>
+<body style="height: 100vh">
+<div id="root" style="height: 100%"></div>
+</body>
+</html>
