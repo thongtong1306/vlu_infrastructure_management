@@ -12,10 +12,10 @@ export default function LabTwo() {
             <header className="imx-header">
                 <div>
                     <h1 className="imx-title">Phòng thí nghiêm 2 – D.1.03 CS2</h1>
-                    <p className="imx-subtitle">Phòng thí nghiệm Hệ thống Tự động và Robot Logistics</p>
+                    <p className="imx-subtitle">Phòng thực hành Hệ thống Tự động và Robot Logistics</p>
                 </div>
                 <nav className="imx-actions">
-                    <Link className="imx-btn" to="/labs">Tất cả Phòng thí nghiệm</Link>
+                    <Link className="imx-btn" to="/labs">Tất cả Phòng thực hành</Link>
                     <Link className="imx-btn" to="/">Trang chủ</Link>
                 </nav>
             </header>
@@ -35,20 +35,20 @@ export default function LabTwo() {
                     <h2 className="imx-card__title" style={{ marginBottom: 8 }}>Thông tin chung</h2>
                     <p style={{ fontSize: 13, lineHeight: 1.5, textAlign: "justify"}}>
                         <p>Phòng Lab Hệ thống Tự động và Robot Logistics (Automation & Robotics Lab), năm thành lập 2024, lưu lượng phục vụ tối đa 50 sinh viên/học phần. Phòng lab tập trung nghiên cứu và vận hành các thiết bị tự động hóa ứng dụng trong lĩnh vực logistics và chuỗi cung ứng. Sinh viên được thực hành với hệ thống AGV, cánh tay robot, cảm biến, băng chuyền, PLC, và hệ điều khiển thông minh. Đây là môi trường lý tưởng để triển khai các giải pháp logistics hiện đại theo hướng công nghiệp 4.0.</p>
-                        <p>Phòng thí nghiệm Hệ thống Tự động và Robot Logistics hiện đang được sử dụng phục vụ học phần: Quản trị sản xuất (71SCMN40123), Quản trị nhà kho và tồn kho (71SCMN40103), Hoạch định mặt bằng (71SCMN40353), Khóa luận tốt nghiệp (71LSCM40326).</p>
+                        <p>Phòng thực hành Hệ thống Tự động và Robot Logistics hiện đang được sử dụng phục vụ học phần: Quản trị sản xuất (71SCMN40123), Quản trị nhà kho và tồn kho (71SCMN40103), Hoạch định mặt bằng (71SCMN40353), Khóa luận tốt nghiệp (71LSCM40326).</p>
                     </p>
                     <ul style={{ marginTop: 0 }}>
                         <li><strong>Vị trí:</strong> Toà nhà D.1.03 Trường Đại học Văn Lang Cơ sở 2</li>
                         <li><strong>Giờ làm việc:</strong> 08:00-17:00 Từ thứ 2 đến thứ 6; 08:00-11:30 Thứ 7; Nghỉ trưa 11:30-13:00. </li>
                         <li><strong>Sức chứa:</strong> 20-30 sinh viên</li>
-                        <li><strong>An toàn:</strong> Theo quy chuẩn phòng thí nghiệm chung. Xem quy định bên dưới.</li>
+                        <li><strong>An toàn:</strong> Theo quy chuẩn Phòng thực hành chung. Xem quy định bên dưới.</li>
                     </ul>
                 </div>
             </section>
 
             <div className="imx-grid imx-grid--two">
                 <div className="imx-card">
-                    <div className="imx-card__header"><h2 className="imx-card__title">Quy định phòng thí nghiệm</h2></div>
+                    <div className="imx-card__header"><h2 className="imx-card__title">Quy định Phòng thực hành</h2></div>
                     <ol className="imx-list" style={{textAlign: "justify"}}>
                         <li>Yêu cầu chung về an toàn</li>
                         <ul className="imx-list">

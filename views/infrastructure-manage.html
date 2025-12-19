@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    (function(){try{var s=localStorage.getItem('theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch{}})();
+  </script>
+
   {{template "base/head.html" .}}
   <meta charset="UTF-8">
   <title>VLU Infrastructure Management System</title>
@@ -12,8 +16,8 @@
     window.limit = "{{.limit}}"
     window.chart = "{{.chart}}"
   </script>
-<link href="/static/js/webpack/dist/infrastructure-manage.cbcfc15bc2f13f325f3e.css" rel="stylesheet"></head>
+<link href="/static/js/webpack/dist/infrastructure-manage.e83f7f5ae584588148c9.css" rel="stylesheet"></head>
 <body style="height: 100vh">
 <div id="root" style="height: 100%"></div>
-<script defer src="/static/js/webpack/dist/infrastructure-manage.bundle.cbcfc15bc2f13f325f3e.js"></script></body>
+<script defer src="/static/js/webpack/dist/infrastructure-manage.bundle.e83f7f5ae584588148c9.js"></script></body>
 </html>

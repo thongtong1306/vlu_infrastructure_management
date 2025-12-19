@@ -11,7 +11,11 @@ export default function BorrowItem() {
     // ---- auth ----
     const session = useMemo(() => {
         try { return JSON.parse(localStorage.getItem('imx_session') || 'null'); } catch { return null; }
-    }, []);
+        }, []);
+    const userId =
+        session?.user?.id ??
+        session?.user_id ??
+        null;
 
     // read token from localStorage OR cookie (fallback)
     const token =
@@ -196,6 +200,7 @@ export default function BorrowItem() {
             item_id: itemId.trim() ? Number(itemId) : undefined,
             quantity: Number(qty) || 1,
             return_date: due.trim() || undefined,
+            user_id: userId || undefined,      // <— send if present
         };
         if (!payload.sku && !payload.item_id) { setError('Provide SKU or Item ID'); return; }
         try {
@@ -214,6 +219,7 @@ export default function BorrowItem() {
             item_id: retItemId.trim() ? Number(retItemId) : undefined,
             condition_on_return: condition.trim() || undefined,
             returned_at: returnedAt.trim() || undefined,
+            user_id: userId || undefined,   // <— add this
         };
         if (!payload.borrow_id && !payload.sku && !payload.item_id) { setError('Provide Borrow ID or SKU / Item ID'); return; }
         try {

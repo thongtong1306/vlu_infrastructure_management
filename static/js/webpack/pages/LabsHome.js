@@ -5,20 +5,20 @@ export default function LabsHome() {
     const cards = [
         {
             to: '/labs/main',
-            title: 'Phòng thí nghiệm 1 – D.1.01 CS2',
-            desc: 'Phòng thí nghiệm Chế tạo và Gia công Cơ khí',
+            title: 'Phòng thực hành 1 – D.1.01 CS2',
+            desc: 'Phòng thực hành Chế tạo và Gia công Cơ khí',
             img: '/static/img/lab/lab1.jpg', // electronics bench
         },
         {
             to: '/labs/lab-2',
-            title: 'Phòng thí nghiệm 2 – D.1.03 CS2',
-            desc: 'Phòng thí nghiệm Hệ thống Tự động và Robot Logistics',
+            title: 'Phòng thực hành 2 – D.1.03 CS2',
+            desc: 'Phòng thực hành Hệ thống Tự động và Robot Logistics',
             img: '/static/img/lab/lab2.jpg', // tools / workshop
         },
         {
             to: '/labs/lab-3',
-            title: 'Phòng thí nghiệm 3 – D.1.04 CS2',
-            desc: 'Phòng thí nghiệm Lập trình & Tối ưu hóa Hệ thống Logistics',
+            title: 'Phòng thực hành 3 – D.1.04 CS2',
+            desc: 'Phòng thực hành Lập trình & Tối ưu hóa Hệ thống Logistics',
             img: '/static/img/lab/lab3.jpg', // racks / instruments
         },
     ];
@@ -27,7 +27,7 @@ export default function LabsHome() {
         <div className="imx-container">
             <header className="imx-header">
                 <div>
-                    <h1 className="imx-title">Tất cả các Phòng thí nghiệm</h1>
+                    <h1 className="imx-title">Tất cả các Phòng thực hành</h1>
                     <p className="imx-subtitle">
                         Select a lab to read the regulations, hours, and equipment notes.
                     </p>

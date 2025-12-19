@@ -69,19 +69,18 @@ export default function Equipments() {
         })();
     }, [selectedId]);
 
-    const filtered = []
-    // const filtered = useMemo(() => {
-    //     const q = filter.trim().toLowerCase();
-    //     if (!q) return items;
-    //     return items.filter(it => {
-    //         const s = `${it.name||""} ${it.sku||""} ${it.category||""} ${it.location||""} ${it.status||""}`.toLowerCase();
-    //         return s.includes(q);
-    //     });
-    // }, [items, filter]);
+    const filtered = useMemo(() => {
+        const q = filter.trim().toLowerCase();
+        if (!q) return items;
+        return items.filter(it => {
+            const s = `${it.name||""} ${it.sku||""} ${it.category||""} ${it.location||""} ${it.status||""}`.toLowerCase();
+            return s.includes(q);
+        });
+    }, [items, filter]);
 
     const navigate = useNavigate();
-    const current = []
-    // const current = useMemo(() => items.find(x => Number(x.id) === Number(selectedId)), [items, selectedId]);
+
+    const current = useMemo(() => items.find(x => Number(x.id) === Number(selectedId)), [items, selectedId]);
     console.log(current)
     return (
         <div className="imx-container">

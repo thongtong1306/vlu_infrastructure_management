@@ -258,3 +258,161 @@ body{
   .imx-card--hero{flex-direction:column}
   .imx-card--hero .imx-card__media--left{height:220px}
 }
+
+/* =========================
+   THEME: Light mode
+   ========================= */
+
+/* Light design tokens */
+:root[data-theme="light"] {
+  --bg: #f6f8fc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #3b82f6; /* keep #4f7cff if you prefer */
+  --danger: #ef4444;
+  --border: #e2e8f0;
+
+  /* optional: swap hero image for light */
+  /* --hero-img: url('/static/img/lab/lab1.jpg'); */
+}
+
+/* Core surfaces */
+:root[data-theme="light"] body {
+  color: var(--text);
+  background: #f8fafc; /* override the dark radial gradient */
+}
+
+:root[data-theme="light"] .imx-card {
+  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.1);
+}
+
+/* Inputs */
+:root[data-theme="light"] .imx-input {
+  background: #ffffff;
+  color: var(--text);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .imx-input::placeholder { color: #94a3b8; }
+
+/* Buttons */
+:root[data-theme="light"] .imx-btn {
+  background: linear-gradient(180deg, #ffffff, #f7fafc);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 2px 8px rgba(16,24,40,.08);
+}
+:root[data-theme="light"] .imx-btn:hover { border-color: #bfdbfe; }
+:root[data-theme="light"] .imx-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+:root[data-theme="light"] .imx-btn--primary {
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Sort buttons */
+:root[data-theme="light"] .imx-sortbtn{
+  background: linear-gradient(180deg, #ffffff, #f7fafc);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 2px 8px rgba(16,24,40,.08);
+}
+:root[data-theme="light"] .imx-sortbtn::after { color: var(--muted); }
+
+/* Tables */
+:root[data-theme="light"] .imx-table th { color: var(--muted); }
+:root[data-theme="light"] .imx-table td { border-bottom-color: var(--border); }
+:root[data-theme="light"] .imx-table tr:hover td { background: #f8fafc; }
+
+/* Feature blocks / sections that had dark hard-coded backgrounds */
+:root[data-theme="light"] #features {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+:root[data-theme="light"] .imx-feature {
+  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  border: 1px solid var(--border);
+}
+
+/* Cards with dark hero/media backgrounds */
+:root[data-theme="light"] .imx-card--hero .imx-card__media--left {
+  background: #f1f5f9;
+}
+
+/* Optional: if NO explicit data-theme is set, respect OS preference */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg: #f6f8fc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --primary: #3b82f6;
+    --danger: #ef4444;
+    --border: #e2e8f0;
+  }
+  :root:not([data-theme]) body { background: #f8fafc; }
+}
+
+/* ---------- layout helpers (stop inlining) ---------- */
+.imx-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.imx-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.imx-stack > * + * { margin-top:14px; }
+.imx-table-wrap { overflow:auto; }
+.imx-table--clickable tbody tr.is-active td { background: rgba(79,124,255,.10); }
+
+/* Buttons: solid / outline variants already exist — unify focus */
+.imx-btn { transition: box-shadow .15s ease, transform .02s ease; }
+.imx-btn:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Cards */
+.imx-card__header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.imx-card__title { margin:0; font-weight:700; }
+
+/* Breadcrumb */
+.imx-breadcrumb { color: var(--muted); display:flex; gap:8px; align-items:center; }
+.imx-breadcrumb a { color: inherit; text-decoration: underline dotted; }
+
+/* Prose (for InstructionView) */
+.imx-prose img { max-width:100%; height:auto; border-radius:12px; }
+
+/* ---------- THEME: Light overrides ---------- */
+:root[data-theme="light"] {
+  --bg: #f7f9fc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #3b82f6;
+  --danger: #ef4444;
+  --border: #e2e8f0;
+  --grid: #e5e7eb;
+}
+
+:root[data-theme="light"] body { background: #f8fafc; color: var(--text); }
+:root[data-theme="light"] .imx-card {
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.1);
+}
+:root[data-theme="light"] .imx-input,
+:root[data-theme="light"] select.imx-input,
+:root[data-theme="light"] textarea.imx-input {
+  background:#ffffff; color:var(--text); border-color:var(--border);
+}
+:root[data-theme="light"] .imx-table th { color: var(--muted); }
+:root[data-theme="light"] .imx-table td { border-bottom-color: var(--border); }
+:root[data-theme="light"] .imx-table tr:hover td { background:#f8fafc; }
+:root[data-theme="light"] .imx-btn { background: linear-gradient(180deg,#fff,#f7fafc); border:1px solid var(--border); }
+:root[data-theme="light"] .imx-btn--primary { color:#fff; border-color:transparent; background: linear-gradient(180deg,#3b82f6,#2563eb); }
+:root[data-theme="light"] .imx-alert { background:#fff; border:1px solid var(--border); color:#1f2937; }
+
+/* Respect OS by default if no data-theme is set */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg:#f7f9fc; --card:#fff; --text:#0f172a; --muted:#64748b; --primary:#3b82f6; --danger:#ef4444; --border:#e2e8f0; --grid:#e5e7eb;
+  }
+  :root:not([data-theme]) body { background:#f8fafc; }
+}

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import ThemeToggle from "./ThemeToggle";
 
 export default class Dashboard extends Component {
     state = {
@@ -17,7 +18,7 @@ export default class Dashboard extends Component {
     
     componentDidMount() {
         document.title = 'Infrastructure Management | Dashboard';
-        // this.load();
+        this.load();
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -321,10 +322,11 @@ export default class Dashboard extends Component {
                     <nav className="imx-actions">
                         {signedIn && <Link className="imx-btn imx-btn--primary" to="/add-item">+ Nhập thêm vật tư</Link>}
                         {signedIn && <Link className="imx-btn" to="/borrow">Mượn / Trả</Link>}
-                        <Link className="imx-btn" to="/labs">Tất cả các Phòng thí nghiệm</Link>
+                        <Link className="imx-btn" to="/labs">Tất cả các Phòng thực hành</Link>
                         <Link className="imx-btn" to="/">Trang chủ</Link>
                         {!signedIn && <Link className="imx-btn" to="/login">Đăng nhập</Link>}
                         {signedIn && <button className="imx-btn" onClick={() => { localStorage.removeItem('imx_session'); window.location.reload(); }}>Logout</button>}
+                        <ThemeToggle />
                     </nav>
                 </header>
 

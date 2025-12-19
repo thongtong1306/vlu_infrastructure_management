@@ -14,11 +14,11 @@ export default function LabMain() {
                 <div>
                     <h1 className="imx-title">Phòng thí nghiệm 1 – D.1.01 CS2</h1>
                     <p className="imx-subtitle">
-                        Phòng thí nghiệm Chế tạo và Gia công Cơ khí
+                        Phòng thực hành Chế tạo và Gia công Cơ khí
                     </p>
                 </div>
                 <nav className="imx-actions">
-                    <Link className="imx-btn" to="/labs">Tất cả Phòng thí nghiệm</Link>
+                    <Link className="imx-btn" to="/labs">Tất cả Phòng thực hành</Link>
                     <Link className="imx-btn" to="/">Trang chủ</Link>
                 </nav>
             </header>
@@ -38,20 +38,20 @@ export default function LabMain() {
                     <h2 className="imx-card__title" style={{marginBottom: 8}}>Thông tin chung</h2>
                     <p style={{fontSize: 13, lineHeight: 1.5, textAlign: "justify"}}>
                         <p>Phòng Lab Chế tạo và Gia công Cơ khí (Mechanical Fabrication Lab), năm thành lập 2023, lưu lượng phục vụ tối đa 120 sinh viên/học phần. Phòng được trang bị máy CNC, máy cắt laser, máy in 3D, máy khoan, máy hàn và dụng cụ cơ khí, ... giúp sinh viên phát triển kỹ năng chế tạo, tư duy kỹ thuật và ứng dụng vào các dự án sáng tạo. Đây là không gian thực hành dành cho việc thiết kế, gia công và lắp ráp các chi tiết cơ khí phục vụ các mô hình và thiết bị logistics.</p>
-                        <p>Phòng thí nghiệm Chế tạo và Gia công Cơ khí hiện đang được sử dụng phục vụ học phần Các mô hình ứng dụng trong Logistics (71SCMN40293), Quản trị chất lượng (71SCMN40023), Kỹ thuật hệ thống (71SCMN40323), Kỹ thuật Logistics (71SCMN40483), Khóa luận tốt nghiệp (71LSCM40326)</p>
+                        <p>Phòng thực hành Chế tạo và Gia công Cơ khí hiện đang được sử dụng phục vụ học phần Các mô hình ứng dụng trong Logistics (71SCMN40293), Quản trị chất lượng (71SCMN40023), Kỹ thuật hệ thống (71SCMN40323), Kỹ thuật Logistics (71SCMN40483), Khóa luận tốt nghiệp (71LSCM40326)</p>
                     </p>
                     <ul style={{ marginTop: 0 }}>
                         <li><strong>Vị trí:</strong> Toà nhà D.1.01 Trường Đại học Văn Lang Cơ sở 2</li>
                         <li><strong>Giờ làm việc:</strong> 08:00-17:00 Từ thứ 2 đến thứ 6; 08:00-11:30 Thứ 7; Nghỉ trưa 11:30-13:00. </li>
                         <li><strong>Sức chứa:</strong> 08 nhóm sinh viên; Mỗi nhóm 2-3 sinh viên</li>
-                        <li><strong>An toàn:</strong> Theo quy chuẩn phòng thí nghiệm chung. Xem quy định bên dưới.</li>
+                        <li><strong>An toàn:</strong> Theo quy chuẩn Phòng thực hành chung. Xem quy định bên dưới.</li>
                     </ul>
                 </div>
             </section>
 
             <div className="imx-grid imx-grid--two">
                 <div className="imx-card">
-                    <div className="imx-card__header"><h2 className="imx-card__title">Quy định phòng thí nghiệm</h2></div>
+                    <div className="imx-card__header"><h2 className="imx-card__title">Quy định Phòng thực hành</h2></div>
                     <ol className="imx-list" style={{textAlign: "justify"}}>
                         <li>Yêu cầu chung về an toàn</li>
                         <ul className="imx-list">

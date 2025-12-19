@@ -70,127 +70,152 @@ type borrowResp struct {
 	Status          string     `json:"status"`
 }
 
-// ---------- POST /api/items ----------
+// Add creates a new equipment row.
 func (c *ItemController) Add() {
+	// tiny local helpers that write straight to the Beego context
+	ok := func(status int, data interface{}) {
+		c.Ctx.Output.SetStatus(status)
+		_ = c.Ctx.Output.JSON(data, false, false)
+	}
+	errf := func(status int, msg string) {
+		c.Ctx.Output.SetStatus(status)
+		_ = c.Ctx.Output.JSON(map[string]interface{}{"ok": false, "error": msg}, false, false)
+	}
+
+	// ---- auth ----
 	if !isAuthed(c.Ctx) {
-		unauthorized(c)
+		errf(401, "unauthorized")
 		return
+	}
+
+	// ---- payload ----
+	type addItemReq struct {
+		SKU               string   `json:"sku"`
+		Name              string   `json:"name"`
+		Description       string   `json:"description"`
+		Category          string   `json:"category"`
+		Location          string   `json:"location"`
+		Quantity          *int     `json:"quantity"`
+		AvailableQuantity *int     `json:"available_quantity"`
+		UnitCost          *float64 `json:"unit_cost"`
+		Supplier          string   `json:"supplier"`
+		DatePurchased     string   `json:"date_purchased"` // "YYYY-MM-DD" or ""
+		Status            string   `json:"status"`
+		ImageURL          *string  `json:"image_url"` // optional
 	}
 
 	var in addItemReq
 	if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&in); err != nil {
-		badRequest(c, "invalid json")
+		errf(400, "invalid json")
 		return
 	}
 
-	in.SKU = trim(in.SKU)
-	in.Name = trim(in.Name)
-	in.Description = trim(in.Description)
-	in.Category = trim(in.Category)
-	in.Location = trim(in.Location)
-	in.Supplier = trim(in.Supplier)
+	// ---- sanitize / defaults ----
+	in.SKU = strings.TrimSpace(in.SKU)
+	in.Name = strings.TrimSpace(in.Name)
+	in.Description = strings.TrimSpace(in.Description)
+	in.Category = strings.TrimSpace(in.Category)
+	in.Location = strings.TrimSpace(in.Location)
+	in.Supplier = strings.TrimSpace(in.Supplier)
+	in.Status = strings.TrimSpace(in.Status)
 	if in.Status == "" {
 		in.Status = "active"
 	}
+	if in.Name == "" {
+		errf(400, "name is required")
+		return
+	}
 
-	if in.SKU == "" || in.Name == "" {
-		badRequest(c, "sku and name are required")
-		return
-	}
 	qty := 0
-	if in.Quantity != nil {
+	if in.Quantity != nil && *in.Quantity > 0 {
 		qty = *in.Quantity
-	}
-	if qty < 0 {
-		badRequest(c, "quantity must be >= 0")
-		return
 	}
 	avail := qty
 	if in.AvailableQuantity != nil {
 		avail = *in.AvailableQuantity
+		if avail < 0 {
+			avail = 0
+		}
 	}
-	if avail < 0 || avail > qty {
-		badRequest(c, "available_quantity must be between 0 and quantity")
-		return
-	}
-	unit := 0.0
+
+	var unit interface{} = nil
 	if in.UnitCost != nil {
 		unit = *in.UnitCost
 	}
-	if unit < 0 {
-		badRequest(c, "unit_cost must be >= 0")
-		return
+
+	var image interface{} = nil
+	if in.ImageURL != nil {
+		if trimmed := strings.TrimSpace(*in.ImageURL); trimmed != "" {
+			image = trimmed
+		}
 	}
 
-	var datePtr *time.Time
-	if in.DatePurchased != "" {
-		dt, err := parseDateYMD(in.DatePurchased)
+	var dateVal interface{} = nil // NULL if empty
+	if d := strings.TrimSpace(in.DatePurchased); d != "" {
+		t, err := time.Parse("2006-01-02", d)
 		if err != nil {
-			badRequest(c, "date_purchased must be YYYY-MM-DD")
+			errf(400, "date_purchased must be YYYY-MM-DD")
 			return
 		}
-		datePtr = dt
+		dateVal = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 	}
 
-	const q = `
+	// ---- INSERT (column order must match placeholders) ----
+	const insertSQL = `
 		INSERT INTO log_lab_equipment_master
-		(name, description, category, image_url, location, quantity, available_quantity, unit_cost, supplier, date_purchased, sku, status, create_at)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?, NOW())
+		  (name, description, category, image_url, location,
+		   quantity, available_quantity, unit_cost, supplier,
+		   date_purchased, sku, status, create_at)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?, ?, NOW())
 	`
 
-	var dateVal interface{}
-	if datePtr == nil {
-		dateVal = sql.NullTime{Valid: false}
-	} else {
-		t := time.Date(datePtr.Year(), datePtr.Month(), datePtr.Day(), 0, 0, 0, 0, time.UTC)
-		dateVal = t
-	}
-
-	res, err := srv.DB.Exec(q,
-		in.Name, in.Description, in.Category, in.Location,
-		qty, avail, unit, in.Supplier, dateVal, in.SKU, in.Status,
+	res, err := srv.DB.Exec(insertSQL,
+		in.Name,        // name
+		in.Description, // description
+		in.Category,    // category
+		image,          // image_url
+		in.Location,    // location
+		qty,            // quantity
+		avail,          // available_quantity
+		unit,           // unit_cost
+		in.Supplier,    // supplier
+		dateVal,        // date_purchased
+		in.SKU,         // sku
+		in.Status,      // status
 	)
 	if err != nil {
 		var me *mysql.MySQLError
 		if errors.As(err, &me) && me.Number == 1062 {
-			badRequest(c, "duplicate sku")
+			errf(400, "duplicate key (likely sku)")
 			return
 		}
-		serverError(c, "insert error")
+		errf(500, "insert error: "+err.Error())
 		return
 	}
-	id64, _ := res.LastInsertId()
-	id := int(id64)
 
-	var out itemRow
-	getQ := `
-		SELECT id, sku, name, description, category, image_url, location, quantity, available_quantity, unit_cost, supplier,
+	newID, _ := res.LastInsertId()
+
+	// ---- return created row ----
+	row := map[string]interface{}{}
+	const getSQL = `
+		SELECT id, sku, name, description, image_url, category, location,
+		       quantity, available_quantity, unit_cost, supplier,
 		       date_purchased, status, create_at
-		FROM log_lab_equipment_master WHERE id=? LIMIT 1
+		FROM log_lab_equipment_master
+		WHERE id = ? LIMIT 1
 	`
-	if err := srv.DB.Get(&out, getQ, id); err != nil {
-		now := time.Now().UTC()
-		out = itemRow{
-			ID:                id,
-			SKU:               in.SKU,
-			Name:              in.Name,
-			Description:       in.Description,
-			Category:          in.Category,
-			Location:          in.Location,
-			Quantity:          qty,
-			AvailableQuantity: avail,
-			UnitCost:          unit,
-			Supplier:          in.Supplier,
-			Status:            in.Status,
-			CreateAt:          now,
-		}
-		if datePtr != nil {
-			out.DatePurchased = datePtr
+	r := srv.DB.QueryRowx(getSQL, newID)
+	if r != nil {
+		if err := r.MapScan(row); err != nil && !errors.Is(err, sql.ErrNoRows) {
+			ok(200, map[string]interface{}{"ok": true, "id": newID})
+			return
 		}
 	}
-
-	c.Ctx.Output.SetStatus(http.StatusCreated)
-	_ = c.Ctx.Output.JSON(out, false, false)
+	if len(row) == 0 {
+		ok(200, map[string]interface{}{"ok": true, "id": newID})
+		return
+	}
+	ok(200, map[string]interface{}{"ok": true, "data": row})
 }
 
 // Optional stub to avoid missing-method panics if routed:
@@ -241,119 +266,159 @@ func (c *ItemController) GetAll() {
 	_ = c.Ctx.Output.JSON(rows, false, false)
 }
 
-// ---------- BORROW ----------
+// uses return_date (or due_date) and updates stock.
 func (c *ItemController) Borrow() {
-	uid, ok := requireUserID(c.Ctx)
-	if !ok {
-		unauthorized(c)
-		return
+	// local JSON helpers
+	ok := func(status int, data interface{}) {
+		c.Ctx.Output.SetStatus(status)
+		_ = c.Ctx.Output.JSON(data, false, false)
+	}
+	errf := func(status int, msg string) {
+		c.Ctx.Output.SetStatus(status)
+		_ = c.Ctx.Output.JSON(map[string]any{"ok": false, "error": msg}, false, false)
+	}
+
+	// payload
+	type borrowReq struct {
+		UserID   *int64 `json:"user_id"`     // optional; fallback to context
+		ItemID   *int64 `json:"item_id"`     // optional if sku provided
+		SKU      string `json:"sku"`         // optional if item_id provided
+		Quantity int    `json:"quantity"`    // required (>0)
+		Return   string `json:"return_date"` // "YYYY-MM-DD" (optional)
+		Due      string `json:"due_date"`    // alias to return_date
 	}
 
 	var in borrowReq
 	if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&in); err != nil {
-		badRequest(c, "invalid json")
+		errf(400, "invalid json")
 		return
 	}
-	in.SKU = strings.TrimSpace(in.SKU)
 	if in.Quantity <= 0 {
-		badRequest(c, "quantity must be > 0")
+		errf(400, "quantity must be > 0")
 		return
 	}
 
-	// resolve item
-	var itemID int
-	var name, sku string
-	var avail int
+	// Resolve user_id: prefer body, else context
+	resolveUserID := func() (int64, bool) {
+		if in.UserID != nil && *in.UserID > 0 {
+			return *in.UserID, true
+		}
+		if v := c.Ctx.Input.GetData("user_id"); v != nil {
+			switch t := v.(type) {
+			case int64:
+				return t, true
+			case int:
+				return int64(t), true
+			case float64:
+				return int64(t), true
+			case string:
+				if id, e := strconv.ParseInt(t, 10, 64); e == nil {
+					return id, true
+				}
+			}
+		}
+		return 0, false
+	}
+	userID, okUID := resolveUserID()
+	if !okUID || userID <= 0 {
+		errf(401, "user id missing")
+		return
+	}
+
+	// Resolve item_id: accept either item_id or sku
+	var itemID int64
+	if in.ItemID != nil && *in.ItemID > 0 {
+		itemID = *in.ItemID
+	} else if s := in.SKU; s != "" {
+		if err := srv.DB.Get(&itemID, `SELECT id FROM log_lab_equipment_master WHERE sku = ? LIMIT 1`, s); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				errf(404, "item not found by sku")
+				return
+			}
+			errf(500, "lookup sku: "+err.Error())
+			return
+		}
+	} else {
+		errf(400, "provide item_id or sku")
+		return
+	}
+
+	// Parse return date (either return_date or due_date)
+	var returnDate interface{} = nil
+	if d := strings.TrimSpace(in.Return); d != "" {
+		t, err := time.Parse("2006-01-02", d)
+		if err != nil {
+			errf(400, "return_date must be YYYY-MM-DD")
+			return
+		}
+		returnDate = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+	} else if d := strings.TrimSpace(in.Due); d != "" {
+		t, err := time.Parse("2006-01-02", d)
+		if err != nil {
+			errf(400, "due_date must be YYYY-MM-DD")
+			return
+		}
+		returnDate = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+	}
 
 	tx, err := srv.DB.Beginx()
 	if err != nil {
-		serverError(c, "begin tx error")
+		errf(500, "tx begin: "+err.Error())
 		return
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	if in.ItemID != nil {
-		// lock row
-		row := tx.QueryRowx(`SELECT id, sku, name, available_quantity FROM log_lab_equipment_master WHERE id=? FOR UPDATE`, *in.ItemID)
-		if err := row.Scan(&itemID, &sku, &name, &avail); err != nil {
-			badRequest(c, "item not found")
+	// Lock & check stock
+	var avail int
+	if err = tx.Get(&avail, `SELECT available_quantity FROM log_lab_equipment_master WHERE id=? FOR UPDATE`, itemID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			errf(404, "item not found")
 			return
 		}
-	} else if in.SKU != "" {
-		row := tx.QueryRowx(`SELECT id, sku, name, available_quantity FROM log_lab_equipment_master WHERE sku=? FOR UPDATE`, in.SKU)
-		if err := row.Scan(&itemID, &sku, &name, &avail); err != nil {
-			badRequest(c, "item not found")
-			return
-		}
-	} else {
-		badRequest(c, "provide sku or item_id")
+		errf(500, "query item: "+err.Error())
 		return
 	}
-
 	if avail < in.Quantity {
-		badRequest(c, fmt.Sprintf("not enough stock: available=%d", avail))
+		errf(400, "not enough stock")
 		return
 	}
 
-	// optional return date
-	var returnDatePtr *time.Time
-	if strings.TrimSpace(in.ReturnDate) != "" {
-		dt, err := time.Parse("2006-01-02", in.ReturnDate)
-		if err != nil {
-			badRequest(c, "return_date must be YYYY-MM-DD")
-			return
-		}
-		t := time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.UTC)
-		returnDatePtr = &t
-	}
-
-	// update stock
-	if _, err := tx.Exec(`UPDATE log_lab_equipment_master SET available_quantity = available_quantity - ? WHERE id=?`,
-		in.Quantity, itemID); err != nil {
-		serverError(c, "update stock error")
-		return
-	}
-
-	// create borrow record
+	// Insert borrow row (matches your columns)
 	res, err := tx.Exec(`
 		INSERT INTO log_lab_borrow_records
-		(user_id, item_id, quantity, borrow_date, return_date, actual_return_date, condition_on_return, status)
-		VALUES (?,?,?, NOW(), ?, NULL, NULL, 'borrowed')
-	`, uid, itemID, in.Quantity, returnDatePtr)
+		  (user_id, item_id, quantity, borrow_date, return_date, actual_return_date, condition_on_return, status)
+		VALUES
+		  (      ?,       ?,        ?,        NOW(),         ?,               NULL,                NULL, 'borrowed')
+	`, userID, itemID, in.Quantity, returnDate)
 	if err != nil {
-		// unique (user_id, item_id, borrow_date) very unlikely to collide, but handle anyway
 		var me *mysql.MySQLError
-		if errors.As(err, &me) && me.Number == 1062 {
-			badRequest(c, "duplicate borrow record")
+		if errors.As(err, &me) && me.Number == 1452 {
+			errf(400, "invalid user_id or item_id")
 			return
 		}
-		serverError(c, "insert borrow error")
+		errf(500, "insert borrow: "+err.Error())
 		return
 	}
-	id64, _ := res.LastInsertId()
+	borrowID, _ := res.LastInsertId()
 
-	// activity
-	logActivityTX(tx.Tx, uid, fmt.Sprintf("Borrowed %s (%s) x%d", name, sku, in.Quantity))
-
-	if err := tx.Commit(); err != nil {
-		serverError(c, "commit error")
+	// Update stock
+	if _, err = tx.Exec(`UPDATE log_lab_equipment_master SET available_quantity = available_quantity - ? WHERE id=?`,
+		in.Quantity, itemID); err != nil {
+		errf(500, "update stock: "+err.Error())
 		return
 	}
 
-	now := time.Now().UTC()
-	out := borrowResp{
-		ID:         int(id64),
-		UserID:     uid,
-		ItemID:     itemID,
-		Quantity:   in.Quantity,
-		BorrowDate: now,
-		Status:     "borrowed",
+	if err = tx.Commit(); err != nil {
+		errf(500, "commit: "+err.Error())
+		return
 	}
-	if returnDatePtr != nil {
-		out.ReturnDate = returnDatePtr
-	}
-	c.Ctx.Output.SetStatus(http.StatusCreated)
-	_ = c.Ctx.Output.JSON(out, false, false)
+
+	ok(200, map[string]any{
+		"ok":       true,
+		"id":       borrowID, // matches your UI message
+		"item_id":  itemID,
+		"quantity": in.Quantity,
+	})
 }
 
 // ---------- RETURN ----------
@@ -367,52 +432,86 @@ type returnReq struct {
 }
 
 func (c *ItemController) Return() {
-	uid, ok := requireUserID(c.Ctx)
-	if !ok {
-		unauthorized(c)
-		return
-	}
+	// small helpers
+	bad := func(msg string) { badRequest(c, msg) }
+	serr := func(msg string) { serverError(c, msg) }
 
+	// ---- payload ----
+	type returnReq struct {
+		UserID            *int64 `json:"user_id,omitempty"`   // optional; fallback to context
+		BorrowID          *int   `json:"borrow_id,omitempty"` // preferred
+		SKU               string `json:"sku,omitempty"`       // or identify by sku...
+		ItemID            *int   `json:"item_id,omitempty"`   // ...or item id
+		Quantity          *int   `json:"quantity,omitempty"`  // full only (for now)
+		ConditionOnReturn string `json:"condition_on_return,omitempty"`
+		ReturnedAt        string `json:"returned_at,omitempty"` // YYYY-MM-DD (optional)
+	}
 	var in returnReq
 	if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&in); err != nil {
-		badRequest(c, "invalid json")
+		bad("invalid json")
 		return
 	}
 	in.SKU = strings.TrimSpace(in.SKU)
 
+	// ---- resolve user_id (body > context) ----
+	resolveUID := func() (int64, bool) {
+		if in.UserID != nil && *in.UserID > 0 {
+			return *in.UserID, true
+		}
+		if v := c.Ctx.Input.GetData("user_id"); v != nil {
+			switch t := v.(type) {
+			case int64:
+				return t, true
+			case int:
+				return int64(t), true
+			case float64:
+				return int64(t), true
+			case string:
+				if id, e := strconv.ParseInt(t, 10, 64); e == nil {
+					return id, true
+				}
+			}
+		}
+		return 0, false
+	}
+	uid64, ok := resolveUID()
+	if !ok || uid64 <= 0 {
+		unauthorized(c)
+		return
+	}
+	uid := int(uid64)
+
 	tx, err := srv.DB.Beginx()
 	if err != nil {
-		serverError(c, "begin tx error")
+		serr("begin tx error")
 		return
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	// locate open borrow record
+	// ---- locate open borrow record ----
 	type rec struct {
-		ID       int
-		ItemID   int
-		Qty      int
-		ItemName string
-		SKU      string
+		ID     int
+		ItemID int
+		Qty    int
+		Name   string
+		SKU    string
 	}
 	var r rec
 
 	if in.BorrowID != nil {
 		row := tx.QueryRowx(`
 			SELECT br.id, br.item_id, br.quantity, em.name, em.sku
-			FROM log_lab_borrow_records br
+			FROM log_lab_borrow_recordsw br
 			JOIN log_lab_equipment_master em ON em.id = br.item_id
 			WHERE br.id=? AND br.user_id=? AND br.actual_return_date IS NULL AND br.status <> 'returned'
 			LIMIT 1`, *in.BorrowID, uid)
-		if err := row.Scan(&r.ID, &r.ItemID, &r.Qty, &r.ItemName, &r.SKU); err != nil {
-			badRequest(c, "open borrow not found for this id")
+		if err := row.Scan(&r.ID, &r.ItemID, &r.Qty, &r.Name, &r.SKU); err != nil {
+			bad("open borrow not found for this id")
 			return
 		}
 	} else {
-		// find by user + (sku OR item_id)
 		cond := `br.user_id=? AND br.actual_return_date IS NULL AND br.status <> 'returned'`
-		var args []interface{}
-		args = append(args, uid)
+		args := []interface{}{uid}
 		if in.ItemID != nil {
 			cond += ` AND br.item_id=?`
 			args = append(args, *in.ItemID)
@@ -420,59 +519,58 @@ func (c *ItemController) Return() {
 			cond += ` AND em.sku=?`
 			args = append(args, in.SKU)
 		} else {
-			badRequest(c, "provide borrow_id or sku/item_id")
+			bad("provide borrow_id or sku/item_id")
 			return
 		}
 
-		// ensure uniqueness (if multiple, ask for borrow_id)
 		rows, err := tx.Queryx(`
 			SELECT br.id, br.item_id, br.quantity, em.name, em.sku
 			FROM log_lab_borrow_records br
 			JOIN log_lab_equipment_master em ON em.id = br.item_id
 			WHERE `+cond, args...)
 		if err != nil {
-			serverError(c, "query error")
+			serr("query error")
 			return
 		}
 		defer rows.Close()
 		found := 0
 		for rows.Next() {
-			if err := rows.Scan(&r.ID, &r.ItemID, &r.Qty, &r.ItemName, &r.SKU); err != nil {
-				serverError(c, "scan error")
+			if err := rows.Scan(&r.ID, &r.ItemID, &r.Qty, &r.Name, &r.SKU); err != nil {
+				serr("scan error")
 				return
 			}
 			found++
 			if found > 1 {
-				badRequest(c, "multiple open borrows; specify borrow_id")
+				bad("multiple open borrows; specify borrow_id")
 				return
 			}
 		}
 		if found == 0 {
-			badRequest(c, "open borrow not found")
+			bad("open borrow not found")
 			return
 		}
 	}
 
-	// quantity: only support full return for now
+	// ---- quantity: full only (for now) ----
 	qty := r.Qty
 	if in.Quantity != nil && *in.Quantity != r.Qty {
-		badRequest(c, "partial returns not supported yet (send full quantity)")
+		bad("partial returns not supported yet (send full quantity)")
 		return
 	}
 
-	// returned at
+	// ---- returned_at ----
 	var retAt *time.Time
-	if strings.TrimSpace(in.ReturnedAt) != "" {
-		dt, err := time.Parse("2006-01-02", in.ReturnedAt)
+	if s := strings.TrimSpace(in.ReturnedAt); s != "" {
+		dt, err := time.Parse("2006-01-02", s)
 		if err != nil {
-			badRequest(c, "returned_at must be YYYY-MM-DD")
+			bad("returned_at must be YYYY-MM-DD")
 			return
 		}
 		t := time.Date(dt.Year(), dt.Month(), dt.Day(), 0, 0, 0, 0, time.UTC)
 		retAt = &t
 	}
 
-	// update record
+	// ---- update borrow (use your table: log_lab_borrow) ----
 	if _, err := tx.Exec(`
 		UPDATE log_lab_borrow_records
 		SET actual_return_date = IFNULL(?, NOW()),
@@ -480,22 +578,22 @@ func (c *ItemController) Return() {
 		    status = 'returned'
 		WHERE id=? AND actual_return_date IS NULL
 	`, retAt, in.ConditionOnReturn, r.ID); err != nil {
-		serverError(c, "update borrow error")
+		serr("update borrow error")
 		return
 	}
 
-	// restore stock
+	// ---- restore stock ----
 	if _, err := tx.Exec(`UPDATE log_lab_equipment_master SET available_quantity = available_quantity + ? WHERE id=?`,
 		qty, r.ItemID); err != nil {
-		serverError(c, "restore stock error")
+		serr("restore stock error")
 		return
 	}
 
-	// activity
-	logActivityTX(tx.Tx, uid, fmt.Sprintf("Returned %s (%s) x%d", r.ItemName, r.SKU, qty))
+	// activity log
+	logActivityTX(tx.Tx, uid, fmt.Sprintf("Returned %s (%s) x%d", r.Name, r.SKU, qty))
 
 	if err := tx.Commit(); err != nil {
-		serverError(c, "commit error")
+		serr("commit error")
 		return
 	}
 
