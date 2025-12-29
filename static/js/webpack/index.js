@@ -28,6 +28,13 @@ const initialState = {
     num: 0,
 };
 
+export function isLoggedIn() {
+    try {
+        const s = JSON.parse(localStorage.getItem('imx_session') || 'null');
+        return !!(s && (s.token || s.user?.id));
+    } catch { return false; }
+}
+
 function reducer(state = initialState, action) {
     switch (action.type) {
         case 'GENERAL_VALUE_UPDATE':
@@ -45,17 +52,6 @@ const store = createStore(
 );
 
 // helper so class pages can call onReduxUpdate (matches your redux-mapping.js)
-export function useReduxMapping() {
-    const dispatch = useDispatch();
-    return {
-        onReduxUpdate: (key, val) =>
-            new Promise((resolve) => {
-                dispatch({ type: 'GENERAL_VALUE_UPDATE', key, value: val });
-                resolve();
-            }),
-    };
-}
-
 // protect routes that need a session
 function Protected({ children }) {
     const session = useSelector((s) => s.session);

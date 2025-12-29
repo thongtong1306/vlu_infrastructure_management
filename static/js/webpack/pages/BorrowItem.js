@@ -17,6 +17,20 @@ export default function BorrowItem() {
         session?.user_id ??
         null;
 
+    // Auto-fill from login info (read-only)
+    const borrowerName = useMemo(() => {
+        const u = session?.user || {};
+        return (
+            u.full_name ||
+            u.name ||
+            u.displayName ||
+            u.username ||
+            u.email ||
+            session?.email ||
+            ''
+        );
+    }, [session]);
+
     // read token from localStorage OR cookie (fallback)
     const token =
         session?.token ||
@@ -200,7 +214,8 @@ export default function BorrowItem() {
             item_id: itemId.trim() ? Number(itemId) : undefined,
             quantity: Number(qty) || 1,
             return_date: due.trim() || undefined,
-            user_id: userId || undefined,      // <— send if present
+            user_id: userId || undefined,
+            borrower_name: (borrowerName || '').trim() || undefined,
         };
         if (!payload.sku && !payload.item_id) { setError('Provide SKU or Item ID'); return; }
         try {
@@ -305,20 +320,29 @@ export default function BorrowItem() {
                                     </div>
                                 )}
                             </div>
+                            <div style={{maxWidth:130}}>
+                                <label className="imx-label">Người mượn</label>
+                                <input style={{maxWidth:130}}
+                                    className="imx-input"
+                                    value={borrowerName || 'Chưa đăng nhập'}
+                                    readOnly
+                                    aria-readonly="true"
+                                />
+                            </div>
 
-                            <div style={{width:160}}>
+                            <div style={{maxWidth:130}}>
                                 <label className="imx-label">ID vật tư (tự động)</label>
-                                <input className="imx-input" value={itemId} onChange={e=>setItemId(e.target.value)} placeholder="optional" />
+                                <input style={{maxWidth:130}} className="imx-input" value={itemId} onChange={e=>setItemId(e.target.value)} placeholder="optional" />
                             </div>
 
-                            <div style={{width:140}}>
+                            <div style={{maxWidth:130}}>
                                 <label className="imx-label">Số lượng</label>
-                                <input className="imx-input" type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)} />
+                                <input style={{maxWidth:130}} className="imx-input" type="number" min="1" value={qty} onChange={e=>setQty(e.target.value)} />
                             </div>
 
-                            <div style={{width:200}}>
+                            <div style={{maxWidth:170}}>
                                 <label className="imx-label">Hạn trả</label>
-                                <input className="imx-input" type="date" value={due} onChange={e=>setDue(e.target.value)} />
+                                <input style={{maxWidth:130}} className="imx-input" type="date" value={due} onChange={e=>setDue(e.target.value)} />
                             </div>
                         </div>
 
@@ -366,14 +390,14 @@ export default function BorrowItem() {
                                 </div>
                             </div>
 
-                            <div style={{width:180}}>
+                            <div style={{maxWidth:180}}>
                                 <label className="imx-label">ID Vât tư</label>
-                                <input className="imx-input" value={retItemId} onChange={e=>setRetItemId(e.target.value)} placeholder="optional" />
+                                <input style={{maxWidth:180}} className="imx-input" value={retItemId} onChange={e=>setRetItemId(e.target.value)} placeholder="optional" />
                             </div>
 
-                            <div style={{width:220}}>
+                            <div style={{maxWidth:300}}>
                                 <label className="imx-label">Trả vào</label>
-                                <input className="imx-input" type="date" value={returnedAt} onChange={e=>setReturnedAt(e.target.value)} />
+                                <input style={{maxWidth:180}} className="imx-input" type="date" value={returnedAt} onChange={e=>setReturnedAt(e.target.value)} />
                             </div>
                         </div>
 

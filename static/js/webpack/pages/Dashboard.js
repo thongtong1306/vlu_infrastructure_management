@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import ThemeToggle from "./ThemeToggle";
+import {useDispatch} from "react-redux";
 
 export default class Dashboard extends Component {
     state = {
