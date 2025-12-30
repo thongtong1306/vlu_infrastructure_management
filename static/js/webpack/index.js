@@ -20,6 +20,35 @@ import LabThree from './pages/labs/LabThree';
 import Equipments from "./pages/Equipments";
 import InstructionView from "./pages/InstructionView";
 
+// ---- bridge localStorage token -> cookie for server auth (runs before React mounts) ----
+(function ensureAuthCookie() {
+    try {
+        const sess = JSON.parse(localStorage.getItem('imx_session') || 'null');
+        const token = sess?.token;
+        const hasCookie = document.cookie.split('; ').some(c => c.startsWith('imx_token='));
+        if (!token || hasCookie) return;
+
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            // dev: same-origin cookie is enough
+            document.cookie = `imx_token=${token}; Path=/; Max-Age=${7 * 24 * 3600}; SameSite=Lax`;
+            return;
+        }
+
+        // prod/subdomain: set parent domain, cross-site friendly
+        const parts = location.hostname.split('.');
+        const parent = parts.slice(-2).join('.');
+        document.cookie = [
+            `imx_token=${token}`,
+            `Domain=.${parent}`,
+            'Path=/',
+            'Max-Age=' + (7 * 24 * 3600),
+            'Secure',
+            'SameSite=None'
+        ].join('; ');
+    } catch {}
+})();
+
+
 // ----- minimal Redux -----
 const initialState = {
     session: null,        // { token, exp, user }
@@ -27,13 +56,6 @@ const initialState = {
     subscriptionInfo: null,
     num: 0,
 };
-
-export function isLoggedIn() {
-    try {
-        const s = JSON.parse(localStorage.getItem('imx_session') || 'null');
-        return !!(s && (s.token || s.user?.id));
-    } catch { return false; }
-}
 
 function reducer(state = initialState, action) {
     switch (action.type) {
