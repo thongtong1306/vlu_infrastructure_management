@@ -379,8 +379,7 @@ export default function BorrowItem() {
                             <div style={{width:200}}>
                                 <label className="imx-label">ID mượn</label>
                                 <input className="imx-input"
-                                       value={borrowerName || 'Chưa đăng nhập'}
-                                       onChange={e=>setReturnedAt(e.target.value)}
+                                       value={borrowId} onChange={e=>setBorrowId(e.target.value)}
                                        placeholder="preferred if multiple" />
                             </div>
 
