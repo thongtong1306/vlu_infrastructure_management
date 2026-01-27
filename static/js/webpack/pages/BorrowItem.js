@@ -115,6 +115,10 @@ export default function BorrowItem() {
     const [condition, setCondition] = useState('');
     const [returnedAt, setReturnedAt] = useState(today.toISOString().split('T')[0]);
 
+    // ---- Open borrows for return (Option A) ----
+    const [openBorrows, setOpenBorrows] = useState([]);
+    const [loadingBorrows, setLoadingBorrows] = useState(false);
+
     // ---- Scanner state (shared) ----
     const [borrowScanOpen, setBorrowScanOpen] = useState(false);
     const [returnScanOpen, setReturnScanOpen] = useState(false);
@@ -156,6 +160,16 @@ export default function BorrowItem() {
             }
         })();
     }, [borrowScanOpen, returnScanOpen, tab]);
+
+    useEffect(() => {
+        if (tab !== 'return') return;
+        if (!retItemId && !retSku) return;
+
+        loadOpenBorrows(
+            retItemId ? Number(retItemId) : undefined,
+            retSku || undefined
+        );
+    }, [retItemId, retSku, tab]);
 
     async function stopScanner() {
         const inst = scannerRef.current;
@@ -226,6 +240,29 @@ export default function BorrowItem() {
             setOk(`Borrowed record #${j.id} (item ${j.item_id})`);
         } catch (err) { setError(String(err.message || err)); }
     }
+
+    async function loadOpenBorrows(itemId, sku) {
+        if (!itemId && !sku) return;
+        try {
+            setLoadingBorrows(true);
+            setOpenBorrows([]);
+
+            const qs = new URLSearchParams();
+            if (itemId) qs.set('item_id', itemId);
+            if (sku) qs.set('sku', sku);
+
+            const res = await api(`/api/items/open-borrows?${qs.toString()}`);
+            const j = await res.json().catch(() => ([]));
+            if (!res.ok) throw new Error(j.error || `HTTP ${res.status}`);
+
+            setOpenBorrows(Array.isArray(j) ? j : []);
+        } catch (e) {
+            setError(e.message || 'Failed to load open borrows');
+        } finally {
+            setLoadingBorrows(false);
+        }
+    }
+
     async function doReturn(e) {
         e.preventDefault(); resetAlerts();
         if (needAuth()) return;
@@ -238,6 +275,10 @@ export default function BorrowItem() {
             user_id: userId || undefined,   // <— add this
         };
         if (!payload.borrow_id && !payload.sku && !payload.item_id) { setError('Provide Borrow ID or SKU / Item ID'); return; }
+        if (openBorrows.length > 1 && !borrowId) {
+            setError('Vui lòng chọn ID mượn cần hoàn trả.');
+            return;
+        }
         try {
             const res = await api('/api/items/return', { method: 'POST', body: JSON.stringify(payload) });
             const j = await res.json().catch(()=> ({}));
@@ -376,6 +417,52 @@ export default function BorrowItem() {
                 {tab === 'return' && (
                     <form className="imx-form" onSubmit={doReturn}>
                         <div className="imx-row" style={{gap:12, flexWrap:'wrap'}}>
+                            {/* ===== Open borrow selector (required when multiple open borrows) ===== */}
+                            {tab === 'return' && (loadingBorrows || openBorrows.length > 0) && (
+                                <div className="imx-card" style={{marginTop:12}}>
+                                    <div className="imx-card__title">Lượt mượn đang mở</div>
+
+                                    {loadingBorrows && (
+                                        <div className="imx-subtitle">Đang tải…</div>
+                                    )}
+
+                                    {!loadingBorrows && openBorrows.length === 0 && (
+                                        <div className="imx-subtitle">Không có lượt mượn đang mở.</div>
+                                    )}
+
+                                    {!loadingBorrows && openBorrows.length > 0 && (
+                                        <div className="imx-sugs">
+                                            {openBorrows.map(b => (
+                                                <div
+                                                    key={b.id}
+                                                    className="imx-row imx-sugrow"
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        background:
+                                                            String(b.id) === String(borrowId)
+                                                                ? 'rgba(46,99,255,.12)'
+                                                                : 'transparent'
+                                                    }}
+                                                    onClick={() => setBorrowId(String(b.id))}
+                                                >
+                                                    <div style={{minWidth:80, fontWeight:700}}>
+                                                        #{b.id}
+                                                    </div>
+                                                    <div style={{minWidth:140}}>
+                                                        {new Date(b.borrow_date).toLocaleDateString()}
+                                                    </div>
+                                                    <div style={{minWidth:80}}>
+                                                        SL: {b.quantity}
+                                                    </div>
+                                                    <div style={{opacity:.7}}>
+                                                        User: {b.user_id}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <div style={{width:200}}>
                                 <label className="imx-label">ID mượn</label>
                                 <input className="imx-input"

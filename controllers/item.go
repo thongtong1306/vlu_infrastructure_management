@@ -501,7 +501,7 @@ func (c *ItemController) Return() {
 	if in.BorrowID != nil {
 		row := tx.QueryRowx(`
 			SELECT br.id, br.item_id, br.quantity, em.name, em.sku
-			FROM log_lab_borrow_recordsw br
+			FROM log_lab_borrow_records br
 			JOIN log_lab_equipment_master em ON em.id = br.item_id
 			WHERE br.id=? AND br.user_id=? AND br.actual_return_date IS NULL AND br.status <> 'returned'
 			LIMIT 1`, *in.BorrowID, uid)
@@ -714,4 +714,80 @@ func requireUserID(ctx *beegoctx.Context) (int, bool) {
 func logActivityTX(tx *sql.Tx, userID int, action string) {
 	_, _ = tx.Exec(`INSERT INTO log_lab_activity_logs (user_id, action, timestamp) VALUES (?,?, NOW())`,
 		userID, action)
+}
+
+// GET /api/items/open-borrows?item_id=6 OR ?sku=23000120
+func (c *ItemController) GetOpenBorrows() {
+	if !isAuthed(c.Ctx) {
+		unauthorized(c)
+		return
+	}
+	// If you want strict auth, prefer:
+	// uid, ok := requireUserID(c.Ctx); if !ok || uid <= 0 { unauthorized(c); return }
+
+	itemIDStr := strings.TrimSpace(c.GetString("item_id"))
+	sku := strings.TrimSpace(c.GetString("sku"))
+
+	if itemIDStr == "" && sku == "" {
+		badRequest(c, "missing item_id or sku")
+		return
+	}
+
+	// Resolve item_id
+	var itemID int64 = 0
+	if itemIDStr != "" {
+		v, err := strconv.ParseInt(itemIDStr, 10, 64)
+		if err != nil || v <= 0 {
+			badRequest(c, "invalid item_id")
+			return
+		}
+		itemID = v
+	} else {
+		// lookup by sku
+		if err := srv.DB.Get(&itemID, `SELECT id FROM log_lab_equipment_master WHERE sku=? LIMIT 1`, sku); err != nil {
+			// Return empty list (frontend can show "no open borrows")
+			_ = c.Ctx.Output.JSON([]map[string]any{}, false, false)
+			return
+		}
+	}
+
+	// Query open borrows (multiple rows allowed)
+	type openBorrowRow struct {
+		ID         int64      `db:"id"         json:"id"`
+		ItemID     int64      `db:"item_id"    json:"item_id"`
+		UserID     int64      `db:"user_id"    json:"user_id"`
+		Quantity   int        `db:"quantity"   json:"quantity"`
+		BorrowDate time.Time  `db:"borrow_date" json:"borrow_date"`
+		ReturnDate *time.Time `db:"return_date" json:"return_date,omitempty"`
+		Status     string     `db:"status"     json:"status"`
+		SKU        string     `db:"sku"        json:"sku"`
+		Name       string     `db:"name"       json:"name"`
+	}
+
+	rows := make([]openBorrowRow, 0)
+	err := srv.DB.Select(&rows, `
+		SELECT
+			br.id,
+			br.item_id,
+			br.user_id,
+			IFNULL(br.quantity, 1) AS quantity,
+			br.borrow_date,
+			br.return_date,
+			IFNULL(br.status, '') AS status,
+			em.sku,
+			em.name
+		FROM log_lab_borrow_records br
+		JOIN log_lab_equipment_master em ON em.id = br.item_id
+		WHERE br.item_id = ?
+		  AND br.actual_return_date IS NULL
+		  AND (br.status IS NULL OR LOWER(br.status) <> 'returned')
+		ORDER BY br.borrow_date DESC
+	`, itemID)
+
+	if err != nil {
+		serverError(c, "query error: "+err.Error())
+		return
+	}
+
+	_ = c.Ctx.Output.JSON(rows, false, false)
 }

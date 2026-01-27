@@ -20,6 +20,7 @@ func init() {
 	beego.Router("/api/equipment-notes", &controllers.EquipmentNoteController{}, "get:GetByItem;post:Add")
 	beego.Router("/api/items/:id([0-9]+)/image", &controllers.ItemController{}, "put:UpdateImageURL")
 	beego.Router("/api/items/:id([0-9]+)", &controllers.ItemController{}, "get:GetOne")
+	beego.Router("/api/items/open-borrows", &controllers.ItemController{}, "get:GetOpenBorrows")
 
 	// ----- Pages (SPA shell) -----
 	beego.Router("/", &controllers.MainController{}, "get:Home")     // server decides: /dashboard or /login
