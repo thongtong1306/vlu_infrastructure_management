@@ -1,0 +1,1112 @@
+/*!**********************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./pages/main.scss ***!
+  \**********************************************************************************************************/
+@charset "UTF-8";
+/* ===========================
+   Flat 2D UI (NO gradients, NO bubbles)
+   Brand: #003768 / #FFF / Yellow / #d72134
+   Keeps existing class names + logic
+   Drop-in replacement for main.scss
+   =========================== */
+/* ===== Tokens ===== */
+:root {
+  --navy:#003768;
+  --red:#d72134;
+  --yellow:#f5c400;
+  --white:#ffffff;
+  --bg:#f8f9fa;
+  --surface:var(--white);
+  --text:#0b1f33;
+  --muted:#586875;
+  --border:#d0d7de;
+  --border-strong:#9aa4ad;
+  --primary:var(--navy);
+  --danger:var(--red);
+  --accent:var(--yellow);
+  --focus:rgba(0,55,104,.35);
+}
+
+/* ===== Base ===== */
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* Kill any glossy styling */
+* {
+  box-shadow: none !important;
+}
+
+/* ===== Shell ===== */
+.imx-container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.imx-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.imx-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: var(--navy);
+}
+
+.imx-subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+/* ===== Topbar / nav ===== */
+.imx-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 52px;
+  padding: 10px 16px;
+  background: var(--navy);
+  color: var(--white);
+  border-bottom: 2px solid var(--yellow);
+}
+
+.imx-topbar a {
+  color: var(--white);
+  text-decoration: none;
+}
+
+.imx-topbar a:hover {
+  text-decoration: underline;
+}
+
+.imx-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.imx-brand__mark {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--yellow);
+  color: #000;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Topbar sub-elements ===== */
+.imx-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.imx-topbar__nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== Panels / cards (flat) ===== */
+.imx-card,
+.imx-panel,
+.imx-box,
+.imx-auth__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* Generic card */
+.imx-card {
+  padding: 14px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+}
+
+.imx-card__title {
+  margin: 0 0 8px;
+  font-weight: 750;
+  color: var(--navy);
+}
+
+.imx-card__muted {
+  color: var(--muted);
+}
+
+.imx-card--tight {
+  padding: 10px;
+}
+
+/* “Row card” layout kept; just flatten */
+.imx-card--row {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.imx-card__body {
+  flex: 1;
+}
+
+/* KPI / shortcut cards */
+.imx-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.imx-kpi__label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.imx-kpi__value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.imx-kpi__delta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.imx-kpi__delta--up {
+  color: var(--navy);
+}
+
+.imx-kpi__delta--down {
+  color: var(--red);
+}
+
+/* ===== Layout grids ===== */
+.imx-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.imx-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.imx-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.imx-grid--kpi {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.imx-grid--shortcuts {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.imx-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ===== Actions / buttons (flat rectangles) ===== */
+.imx-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.imx-btn,
+button {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  color: var(--navy);
+  padding: 9px 12px;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  line-height: 1.1;
+}
+
+.imx-btn:hover, button:hover {
+  border-color: var(--navy);
+  background: #f9fbff;
+}
+
+.imx-btn:active, button:active {
+  background: #f1f5fb;
+}
+
+.imx-btn:disabled, button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.imx-btn--primary {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
+}
+
+.imx-btn--primary:hover {
+  background: #002d54;
+}
+
+.imx-btn--danger {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.imx-btn--danger:hover {
+  background: #b71b2b;
+}
+
+.imx-btn--accent {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #000;
+}
+
+.imx-btn--accent:hover {
+  background: #e9b900;
+}
+
+/* Small icon buttons */
+.imx-iconbtn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  border-radius: 0;
+}
+
+.imx-iconbtn:hover {
+  border-color: var(--navy);
+  background: #f9fbff;
+}
+
+/* ===== Inputs / forms (flat) ===== */
+.imx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.imx-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+input, select, textarea,
+.imx-input, .imx-select, .imx-textarea {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font: inherit;
+  background: var(--white);
+  color: var(--text);
+}
+
+textarea, .imx-textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+input:focus, select:focus, textarea:focus,
+.imx-input:focus, .imx-select:focus, .imx-textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 2px var(--focus) !important;
+}
+
+/* Search row + generic row layout */
+.imx-search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.imx-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ===== Badges / status ===== */
+.imx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 0;
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  color: var(--navy);
+}
+
+.imx-badge--ok {
+  border-color: rgba(0, 55, 104, 0.45);
+  color: var(--navy);
+}
+
+.imx-badge--warn {
+  border-color: rgba(245, 196, 0, 0.85);
+  background: rgba(245, 196, 0, 0.18);
+  color: #000;
+}
+
+.imx-badge--bad {
+  border-color: rgba(215, 33, 52, 0.65);
+  background: rgba(215, 33, 52, 0.1);
+  color: var(--red);
+}
+
+/* ===== Tables (flat industrial) ===== */
+.imx-table,
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border: 1px solid var(--border);
+}
+
+.imx-table th,
+table th {
+  background: var(--red);
+  color: var(--white);
+  font-weight: 750;
+  padding: 10px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--yellow);
+}
+
+.imx-table td,
+table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border);
+  color: #111;
+}
+
+.imx-table tr:hover td,
+table tr:hover td {
+  background: #f8fafc;
+}
+
+/* ===== Auth ===== */
+.imx-auth {
+  min-height: calc(100vh - 52px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.imx-auth__card {
+  width: 100%;
+  max-width: 420px;
+  padding: 18px;
+}
+
+.imx-auth__title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 850;
+  color: var(--navy);
+}
+
+.imx-auth__hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+}
+
+/* ===== QR / misc blocks ===== */
+.imx-qrcard {
+  width: 360px;
+  height: 360px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Links ===== */
+.imx-link {
+  color: var(--navy);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.imx-link:hover {
+  color: #002d54;
+}
+
+/* ===== Alerts ===== */
+.imx-alert {
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  border-left: 4px solid var(--navy);
+  color: var(--text);
+  border-radius: 0;
+}
+
+.imx-alert--error {
+  border-left-color: var(--red);
+  background: rgba(215, 33, 52, 0.06);
+  border-color: rgba(215, 33, 52, 0.35);
+}
+
+/* ===== Danger text helper ===== */
+.imx-danger {
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* ===== Form wrapper ===== */
+.imx-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== Checkbox ===== */
+.imx-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.imx-checkbox input[type=checkbox] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--navy);
+}
+
+/* ===== Input group / addons ===== */
+.imx-input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.imx-input-addon {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-right: 0;
+  background: #eef2f6;
+  color: var(--muted);
+  border-radius: 0;
+}
+
+.imx-input--with-addon {
+  border-left: 0;
+}
+
+/* ===== Hero / gallery (flat) ===== */
+.imx-hero {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.imx-card--hero {
+  padding: 14px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--yellow);
+  border-radius: 0;
+}
+
+.imx-card--hover:hover {
+  border-color: var(--navy);
+}
+
+.imx-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.imx-card__media,
+.imx-card__image,
+.imx-card__cover {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+
+.imx-card__media img,
+.imx-card__image img,
+.imx-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ===== Feature blocks ===== */
+.imx-feature {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.imx-feature__icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: #eef2f6;
+}
+
+.imx-feature__title {
+  margin: 0;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.imx-feature__desc {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ===== Gallery ===== */
+.imx-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.imx-gallery > * {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  min-height: 92px;
+}
+
+/* ===== QR helpers ===== */
+.imx-qrwrap {
+  /* override "center everything" behavior */
+  display: grid;
+  grid-template-columns: 520px 1fr; /* scan box + info */
+  gap: 16px;
+  align-items: start;
+  justify-content: start;
+  width: 100%;
+}
+
+.imx-qrcard,
+.imx-qrbox {
+  width: 520px;
+  height: 520px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imx-qrcard video,
+.imx-qrcard canvas,
+.imx-qrbox video,
+.imx-qrbox canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Right-side info area (wrap whatever text/inputs you already have) */
+.imx-qrside {
+  min-width: 260px;
+}
+
+.imx-qrside .imx-field,
+.imx-qrside input,
+.imx-qrside .imx-input {
+  max-width: 360px; /* prevents tiny input floating in huge blank */
+}
+
+/* Optional: make the "Đã quét SKU" line look like a flat panel */
+.imx-qrstatus {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 12px;
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 960px) {
+  .imx-qrwrap {
+    grid-template-columns: 1fr;
+  }
+  .imx-qrcard,
+  .imx-qrbox {
+    width: 100%;
+    height: min(70vw, 420px); /* responsive square-ish */
+  }
+  .imx-qrside .imx-field,
+  .imx-qrside input,
+  .imx-qrside .imx-input {
+    max-width: 100%;
+  }
+}
+.imx-qr-overlay {
+  border: 2px solid var(--yellow);
+  border-radius: 0;
+}
+
+.imx-qrhelp {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.imx-auth__subtitle {
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.imx-auth__help {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+/* ===== Button outline variant ===== */
+.imx-btn--outline {
+  background: var(--white);
+  color: var(--navy);
+  border: 1px solid var(--navy);
+}
+
+.imx-btn--outline:hover {
+  background: #f3f7ff;
+}
+
+/* ===== Shortcuts ===== */
+.imx-shortcut {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.imx-shortcut__icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2f6;
+  border: 1px solid var(--border);
+}
+
+.imx-shortcut__title {
+  margin: 0;
+  font-weight: 850;
+  color: var(--navy);
+}
+
+.imx-shortcut__desc {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ===== Sort button ===== */
+.imx-sortbtn {
+  border: 1px solid var(--border-strong);
+  background: var(--white);
+  color: var(--navy);
+  padding: 8px 10px;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.imx-sortbtn:hover {
+  border-color: var(--navy);
+  background: #f9fbff;
+}
+
+/* ===== Suggestions ===== */
+.imx-sugs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.imx-sugrow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+}
+
+/* ===== Table wrapper ===== */
+.imx-table-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  overflow: auto;
+}
+
+/* ===== Footer ===== */
+.imx-site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.imx-site-footer a {
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.imx-site-footer a:hover {
+  text-decoration: underline;
+}
+
+.imx-site-footer__links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== Utilities (keep if you already use them) ===== */
+.imx-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+
+.imx-hidden {
+  display: none !important;
+}
+
+.imx-w-100 {
+  width: 100% !important;
+}
+
+/* =========================
+   Responsive (mobile-first tweaks)
+   ========================= */
+@media (max-width: 960px) {
+  .imx-grid--kpi, .imx-grid--shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .imx-grid--two {
+    grid-template-columns: 1fr;
+  }
+  .imx-feature-grid {
+    grid-template-columns: 1fr;
+  }
+  .imx-card__media--left {
+    width: 120px;
+    min-width: 120px;
+    height: 90px;
+  }
+  .imx-card__media,
+  .imx-card__image,
+  .imx-card__cover {
+    height: 160px;
+  }
+}
+@media (max-width: 600px) {
+  .imx-container {
+    padding: 14px;
+  }
+  .imx-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .imx-title {
+    font-size: 21px;
+  }
+  .imx-actions {
+    width: 100%;
+  }
+  .imx-actions .imx-btn {
+    width: 100%;
+    text-align: center;
+  }
+  .imx-grid--kpi,
+  .imx-grid--shortcuts,
+  .imx-grid--three {
+    grid-template-columns: 1fr;
+  }
+  .imx-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .imx-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .imx-row > * {
+    width: 100%;
+  }
+  .imx-topbar {
+    height: auto;
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .imx-auth {
+    padding: 16px;
+  }
+  .imx-auth__card {
+    padding: 16px;
+  }
+  .imx-card--row {
+    flex-direction: column;
+  }
+  .imx-card__media--left {
+    width: 100%;
+    min-width: 0;
+    height: 160px;
+  }
+  .imx-qrcard {
+    width: 100%;
+    max-width: 340px;
+    height: 340px;
+  }
+  .imx-table th, .imx-table td {
+    padding: 10px 8px;
+  }
+  .imx-site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+/* =========================
+   Highcharts tooltip – flat light theme
+   ========================= */
+/* Tooltip container */
+.highcharts-tooltip,
+.highcharts-tooltip text,
+.highcharts-tooltip span {
+  fill: #0b1f33 !important; /* SVG text color */
+  color: #0b1f33 !important;
+  font-size: 12px !important;
+}
+
+/* Tooltip background box */
+.highcharts-tooltip path,
+.highcharts-tooltip rect {
+  fill: #ffffff !important;
+  stroke: var(--border) !important;
+  stroke-width: 1px !important;
+}
+
+/* Remove shadow filter */
+.highcharts-tooltip {
+  filter: none !important;
+}
+
+/* Tooltip title */
+.highcharts-tooltip .highcharts-tooltip-title {
+  font-weight: 700;
+  fill: var(--navy) !important;
+}
+
+/* =========================================================
+   SAFETY PATCH — keep current scheme, stop inner-page flowout
+   Append at the VERY BOTTOM of main.scss
+   ========================================================= */
+/* 1) Prevent horizontal overflow globally (common "flowout" symptom) */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* 2) Make all media obey container width */
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 3) Flex/grid shrink guards (prevents children forcing overflow) */
+.imx-header,
+.imx-topbar,
+.imx-card--hero,
+.imx-row,
+.imx-actions {
+  min-width: 0;
+}
+
+.imx-header > *,
+.imx-topbar > *,
+.imx-card--hero > *,
+.imx-row > *,
+.imx-actions > * {
+  min-width: 0;
+}
+
+/* 4) If any inner-page hero/banner uses a large image wrapper, keep it clipped */
+.imx-card--hero .imx-card__media--left,
+.imx-card__media,
+.imx-hero {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 5) If some element is accidentally using viewport width, force it back
+   (safe because it only applies to elements that explicitly set width: 100vw) */
+*[style*="width:100vw"],
+*[style*="width: 100vw"] {
+  width: 100% !important;
+}
+
+/* 6) Mobile: reduce padding so content doesn't push out on small screens */
+@media (max-width: 600px) {
+  .imx-container {
+    padding: 14px;
+  }
+  .imx-topbar {
+    padding: 0 12px;
+  }
+}
+/* =========================
+   Homepage cards: prevent overlap (scope subtitle & button)
+   ========================= */
+/* Make card body a safe vertical flow container */
+.imx-card__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* IMPORTANT: reset subtitle inside cards (avoid global .imx-subtitle rules) */
+.imx-card__body .imx-subtitle {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  margin: 8px 0 0 !important;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+/* Ensure the button never overlaps text */
+.imx-card__body .imx-btn {
+  margin-top: 12px !important; /* overrides inline style conflicts if any */
+  align-self: flex-start; /* keeps it aligned */
+}
+
+/* Optional: make all 3 homepage cards equal height + button aligned bottom */
+.imx-card--hover {
+  height: 100%;
+}
+
+.imx-card--hover .imx-card__body {
+  height: 100%;
+}
+
+.imx-card--hover .imx-card__body .imx-btn {
+  margin-top: auto !important; /* pushes button to bottom */
+}
+
+/* =========================================================
+   Login page background image (scoped, safe)
+   ========================================================= */
+/* Scope ONLY the login page */
+body.login,
+.imx-login-page,
+.imx-auth {
+  background-image: url(/static/js/webpack/dist/28acdf5fd9d0d8e1ddff.avif);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Add a soft overlay to keep text readable */
+body.login::before,
+.imx-login-page::before,
+.imx-auth::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Ensure login content stays above overlay */
+.imx-auth,
+.imx-login-page,
+.imx-auth * {
+  position: relative;
+  z-index: 1;
+}

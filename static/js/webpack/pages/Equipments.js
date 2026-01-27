@@ -220,7 +220,7 @@ export default function Equipments() {
                     {/* Instructions */}
                     <div className="imx-card">
                         <div className="imx-card__header">
-                            <h2 className="imx-card__title">hướng dẫn sử dụng</h2>
+                            <h2 className="imx-card__title">Hướng dẫn sử dụng</h2>
                             <span className="imx-subtitle">{selectedId ? `Vật tư #${selectedId}` : ""}</span>
                         </div>
                         <div className="imx-table-wrap">

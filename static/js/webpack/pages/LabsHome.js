@@ -11,13 +11,13 @@ export default function LabsHome() {
         },
         {
             to: '/labs/lab-2',
-            title: 'Phòng thực hành 2 – D.1.03 CS2',
+            title: 'Phòng thực hành 2 – D.1.04 CS2',
             desc: 'Phòng thực hành Hệ thống Tự động và Robot Logistics',
             img: '/static/img/lab/lab2.jpg', // tools / workshop
         },
         {
             to: '/labs/lab-3',
-            title: 'Phòng thực hành 3 – D.1.04 CS2',
+            title: 'Phòng thực hành 3 – D.1.05 CS2',
             desc: 'Phòng thực hành Lập trình & Tối ưu hóa Hệ thống Logistics',
             img: '/static/img/lab/lab3.jpg', // racks / instruments
         },

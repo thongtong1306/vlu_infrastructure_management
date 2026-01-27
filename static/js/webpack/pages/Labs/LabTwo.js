@@ -11,7 +11,7 @@ export default function LabTwo() {
         <div className="imx-container">
             <header className="imx-header">
                 <div>
-                    <h1 className="imx-title">Phòng thí nghiêm 2 – D.1.03 CS2</h1>
+                    <h1 className="imx-title">Phòng thí nghiêm 2 – D.1.04 CS2</h1>
                     <p className="imx-subtitle">Phòng thực hành Hệ thống Tự động và Robot Logistics</p>
                 </div>
                 <nav className="imx-actions">
@@ -38,7 +38,7 @@ export default function LabTwo() {
                         <p>Phòng thực hành Hệ thống Tự động và Robot Logistics hiện đang được sử dụng phục vụ học phần: Quản trị sản xuất (71SCMN40123), Quản trị nhà kho và tồn kho (71SCMN40103), Hoạch định mặt bằng (71SCMN40353), Khóa luận tốt nghiệp (71LSCM40326).</p>
                     </p>
                     <ul style={{ marginTop: 0 }}>
-                        <li><strong>Vị trí:</strong> Toà nhà D.1.03 Trường Đại học Văn Lang Cơ sở 2</li>
+                        <li><strong>Vị trí:</strong> Toà nhà D.1.04 Trường Đại học Văn Lang Cơ sở 2</li>
                         <li><strong>Giờ làm việc:</strong> 08:00-17:00 Từ thứ 2 đến thứ 6; 08:00-11:30 Thứ 7; Nghỉ trưa 11:30-13:00. </li>
                         <li><strong>Sức chứa:</strong> 20-30 sinh viên</li>
                         <li><strong>An toàn:</strong> Theo quy chuẩn Phòng thực hành chung. Xem quy định bên dưới.</li>

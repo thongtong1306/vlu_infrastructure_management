@@ -12,7 +12,7 @@ export default class Dashboard extends Component {
         error: null,
         data: null,              // full JSON from /api/dashboard-stat
         sortKey: 'id',
-        sortDir: 'desc',
+        sortDir: 'asc',
         query: '',
         statusFilter: 'all',
     };
@@ -80,17 +80,30 @@ export default class Dashboard extends Component {
         }).length;
 
         const maintenanceOpen = mt.filter(m => !m.date_fixed).length;
-        const utilization = total ? Math.round((borrowedActive / total) * 100) : 0;
+        const totalQty = eq.reduce(
+            (sum, e) => sum + Number(e.quantity || 0),
+            0
+        );
+
+        const borrowedQty = br
+            .filter(r => !r.actual_return_date)
+            .reduce((sum, r) => sum + Number(r.quantity || 1), 0);
+
+        const utilization = totalQty
+            ? Math.round((borrowedQty / totalQty) * 10000) / 100
+            : 0;
 
         return { total, available, borrowed: borrowedActive, overdue, maintenanceOpen, utilization };
     }
 
     // ---------- sort helpers ----------
     setSort = (key) => {
-        this.setState(s => ({
-            sortKey: key,
-            sortDir: s.sortKey === key && s.sortDir === 'desc' ? 'asc' : 'desc'
-        }));
+        this.setState((s) => {
+            const same = s.sortKey === key;
+            // first click on a new column => ASC (more natural for ID)
+            const nextDir = same ? (s.sortDir === "asc" ? "desc" : "asc") : "asc";
+            return { sortKey: key, sortDir: nextDir };
+        });
     };
     getAriaSort = (key) =>
         this.state.sortKey === key ? (this.state.sortDir === 'asc' ? 'ascending' : 'descending') : 'none';
@@ -111,14 +124,69 @@ export default class Dashboard extends Component {
 
     sortRows(rows) {
         const { sortKey, sortDir } = this.state;
-        const dir = sortDir === 'asc' ? 1 : -1;
+        const dir = sortDir === "asc" ? 1 : -1;
+
+        const collator = new Intl.Collator(undefined, {
+            numeric: true,
+            sensitivity: "base",
+        });
+
+        const norm = (v) => {
+            if (v === null || v === undefined) return null;
+            if (typeof v === "string") {
+                const t = v.trim();
+                return t === "" ? null : t;
+            }
+            return v;
+        };
+
+        const isNumericLike = (v) => {
+            if (typeof v === "number") return Number.isFinite(v);
+            if (typeof v !== "string") return false;
+            // allow "23000180", "10", "10.5" ; reject dates/words
+            return /^-?\d+(\.\d+)?$/.test(v.trim());
+        };
+
+        const asNumber = (v) => (typeof v === "number" ? v : Number(v));
+        const asTime = (v) => {
+            // Only treat as date if Date.parse succeeds
+            const t = Date.parse(v);
+            return Number.isNaN(t) ? null : t;
+        };
+
+        const baseCompare = (aVal, bVal) => {
+            const aN = norm(aVal);
+            const bN = norm(bVal);
+
+            // empty/null last
+            if (aN === null && bN === null) return 0;
+            if (aN === null) return 1;
+            if (bN === null) return -1;
+
+            // date compare (strings like "1/10/2025, 7:00:00 AM" or ISO)
+            const at = typeof aN === "string" ? asTime(aN) : null;
+            const bt = typeof bN === "string" ? asTime(bN) : null;
+            if (at !== null && bt !== null) return at - bt;
+
+            // numeric compare (IDs, quantities, available_quantity...)
+            if (isNumericLike(aN) && isNumericLike(bN)) {
+                return asNumber(aN) - asNumber(bN);
+            }
+
+            // string compare
+            return collator.compare(String(aN), String(bN));
+        };
+
         return [...(rows || [])].sort((a, b) => {
-            const av = a?.[sortKey] ?? '';
-            const bv = b?.[sortKey] ?? '';
-            const at = Date.parse(av), bt = Date.parse(bv);
-            if (!Number.isNaN(at) && !Number.isNaN(bt)) return (at - bt) * dir;
-            if (av === bv) return 0;
-            return av > bv ? dir : -dir;
+            const av = a?.[sortKey];
+            const bv = b?.[sortKey];
+
+            const c = baseCompare(av, bv);
+            if (c !== 0) return c * dir;
+
+            // stable tie-breaker: id ascending (so it doesn't jump)
+            const idc = baseCompare(a?.id, b?.id);
+            return idc;
         });
     }
 
@@ -137,26 +205,43 @@ export default class Dashboard extends Component {
 
         const eq = d.log_lab_equipment_master || [];
         const br = d.log_lab_borrow_records || [];
-        const total = eq.length || 1;
+
+        // ✅ Correct denominator: total physical quantity in inventory
+        const totalQty = eq.reduce((sum, e) => sum + Number(e.quantity || 0), 0) || 1;
 
         // intervals: [borrow_date, actual_return_date || now)
+        const now = Date.now();
         const intervals = br.map(r => ({
             start: new Date(r.borrow_date).getTime(),
-            end: r.actual_return_date ? new Date(r.actual_return_date).getTime() : Date.now(),
+            end: r.actual_return_date ? new Date(r.actual_return_date).getTime() : now,
             qty: Number(r.quantity || 1),
         }));
 
         const cats = [];
         const vals = [];
-        const today = new Date(); today.setHours(0,0,0,0);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+
         for (let i = days - 1; i >= 0; i--) {
-            const dt = new Date(today); dt.setDate(today.getDate() - i);
+            const dt = new Date(today);
+            dt.setDate(today.getDate() - i);
             const ts = dt.getTime();
-            const borrowedQty = intervals.reduce((acc, it) => (it.start <= ts && ts < it.end) ? acc + it.qty : acc, 0);
-            const util = Math.max(0, Math.min(100, Math.round((borrowedQty / total) * 100)));
+
+            // borrowed quantity active on that day
+            let borrowedQty = 0;
+            for (const it of intervals) {
+                if (it.start <= ts && ts < it.end) borrowedQty += it.qty;
+            }
+
+            // ✅ Safety: never exceed totalQty (prevents weird >100% from bad data)
+            if (borrowedQty > totalQty) borrowedQty = totalQty;
+            if (borrowedQty < 0) borrowedQty = 0;
+
+            const util = Math.round((borrowedQty / totalQty) * 10000) / 100;
+
             cats.push(this.ymd(dt));
             vals.push(util);
         }
+
         return { categories: cats, series: [{ name: 'Utilization', data: vals }] };
     }
 
@@ -218,7 +303,7 @@ export default class Dashboard extends Component {
             <div className="imx-card" key={title} id={domId}>
                 <div className="imx-card__header">
                     <h2 className="imx-card__title">{title}</h2>
-                    <span className="imx-subtitle">{rows?.length ?? 0} rows</span>
+                    <span className="imx-subtitle">{rows?.length ?? 0} dòng</span>
                 </div>
                 <div className="imx-table-wrap">
                     {rows && rows.length ? (
@@ -261,7 +346,7 @@ export default class Dashboard extends Component {
                 ...r,
                 item_sku: item?.sku || '-',
                 item_name: item?.name || '-',
-                overdue_flag: (!r.actual_return_date && r.return_date && Date.parse(r.return_date) < Date.now()) ? 'OVERDUE' : '',
+                overdue_flag: (!r.actual_return_date && r.return_date && Date.parse(r.return_date) < Date.now()) ? 'QUÁ HẠN' : '',
             };
         });
 
@@ -327,7 +412,7 @@ export default class Dashboard extends Component {
                         <Link className="imx-btn" to="/">Trang chủ</Link>
                         {!signedIn && <Link className="imx-btn" to="/login">Đăng nhập</Link>}
                         {signedIn && <button className="imx-btn" onClick={() => { localStorage.removeItem('imx_session'); window.location.reload(); }}>Logout</button>}
-                        <ThemeToggle />
+                        {/*<ThemeToggle />*/}
                     </nav>
                 </header>
 

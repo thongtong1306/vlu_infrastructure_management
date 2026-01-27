@@ -108,11 +108,12 @@ export default function BorrowItem() {
     };
 
     // ---- Return form ----
+    let today = new Date()
     const [borrowId, setBorrowId]   = useState('');
     const [retSku, setRetSku]       = useState('');
     const [retItemId, setRetItemId] = useState('');
     const [condition, setCondition] = useState('');
-    const [returnedAt, setReturnedAt] = useState('');
+    const [returnedAt, setReturnedAt] = useState(today.toISOString().split('T')[0]);
 
     // ---- Scanner state (shared) ----
     const [borrowScanOpen, setBorrowScanOpen] = useState(false);
@@ -272,7 +273,7 @@ export default function BorrowItem() {
                 </div>
 
                 {error && <div className="imx-alert imx-alert--error">{error}</div>}
-                {ok && <div className="imx-alert" style={{borderColor:'#2e63ff', color:'#cfe0ff'}}>{ok}</div>}
+                {ok && <div className="imx-alert" style={{borderColor:'#2e63ff'}}>{ok}</div>}
                 {scanErr && <div className="imx-alert imx-alert--error">{scanErr}</div>}
 
                 {/* ===== Borrow ===== */}
@@ -329,10 +330,14 @@ export default function BorrowItem() {
                                     aria-readonly="true"
                                 />
                             </div>
-
                             <div style={{maxWidth:130}}>
                                 <label className="imx-label">ID vật tư (tự động)</label>
-                                <input style={{maxWidth:130}} className="imx-input" value={itemId} onChange={e=>setItemId(e.target.value)} placeholder="optional" />
+                                <input style={{maxWidth:130}}
+                                       className="imx-input"
+                                       value={itemId}
+                                       readOnly
+                                       aria-readonly="true"
+                                       placeholder="optional" />
                             </div>
 
                             <div style={{maxWidth:130}}>
@@ -372,8 +377,12 @@ export default function BorrowItem() {
                     <form className="imx-form" onSubmit={doReturn}>
                         <div className="imx-row" style={{gap:12, flexWrap:'wrap'}}>
                             <div style={{width:200}}>
-                                <label className="imx-label">ID Mượn</label>
-                                <input className="imx-input" value={borrowId} onChange={e=>setBorrowId(e.target.value)} placeholder="preferred if multiple" />
+                                <label className="imx-label">Người mượn</label>
+                                <input className="imx-input"
+                                       value={borrowerName || 'Chưa đăng nhập'}
+                                       readOnly
+                                       aria-readonly="true"
+                                       placeholder="preferred if multiple" />
                             </div>
 
                             <div style={{flex:1, minWidth:260}}>
@@ -391,13 +400,22 @@ export default function BorrowItem() {
                             </div>
 
                             <div style={{maxWidth:180}}>
-                                <label className="imx-label">ID Vât tư</label>
-                                <input style={{maxWidth:180}} className="imx-input" value={retItemId} onChange={e=>setRetItemId(e.target.value)} placeholder="optional" />
+                                <label className="imx-label">ID Vât tư (tự động)</label>
+                                <input style={{maxWidth:180}}
+                                       className="imx-input"
+                                       value={retItemId}
+                                       readOnly
+                                       aria-readonly="true"
+                                       placeholder="optional" />
                             </div>
 
                             <div style={{maxWidth:300}}>
                                 <label className="imx-label">Trả vào</label>
-                                <input style={{maxWidth:180}} className="imx-input" type="date" value={returnedAt} onChange={e=>setReturnedAt(e.target.value)} />
+                                <input style={{maxWidth:180}} className="imx-input"
+                                       type="date"
+                                       value={returnedAt}
+                                       onChange={e=>setReturnedAt(e.target.value)}
+                                />
                             </div>
                         </div>
 
