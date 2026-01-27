@@ -377,11 +377,10 @@ export default function BorrowItem() {
                     <form className="imx-form" onSubmit={doReturn}>
                         <div className="imx-row" style={{gap:12, flexWrap:'wrap'}}>
                             <div style={{width:200}}>
-                                <label className="imx-label">Người mượn</label>
+                                <label className="imx-label">ID mượn</label>
                                 <input className="imx-input"
                                        value={borrowerName || 'Chưa đăng nhập'}
-                                       readOnly
-                                       aria-readonly="true"
+                                       onChange={e=>setReturnedAt(e.target.value)}
                                        placeholder="preferred if multiple" />
                             </div>
 
